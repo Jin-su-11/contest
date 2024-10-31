@@ -1,0 +1,15 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: contest
+  datasource:
+    url: jdbc:mysql://localhost:3306/ict
+    username: ict
+    password: ict
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
