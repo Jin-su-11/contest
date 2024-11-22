@@ -6,12 +6,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpStatus;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/machines")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "*")
 public class MachineController {
 
     private final MachineService machineService;
@@ -23,19 +30,25 @@ public class MachineController {
 
     @GetMapping
     public List<Machine> getAllMachines() {
-        List<Machine> machines = machineService.getAllMachines();
-        machineService.saveMachinesToJson(); // JSON 파일로 저장
-        return machines;
+        return machineService.getAllMachines();
     }
 
-    @PostMapping
-    public Machine createMachine(@RequestBody Machine machine) {
-        return machineService.saveMachine(machine);
+    @PostMapping("/receiveData")
+    public ResponseEntity<String> receiveData(@RequestParam("Did") int deviceId,
+                                              @RequestParam("val") float injectTotalValue,
+                                              @RequestParam("spd") float droppingSpeed) {
+        machineService.processReceivedData(deviceId, injectTotalValue, droppingSpeed);
+        return ResponseEntity.ok("Data received and processed successfully");
     }
 
-    @GetMapping("/saveToJson")
-    public ResponseEntity<String> saveMachinesToJson() {
-        machineService.saveMachinesToJson();
-        return ResponseEntity.ok("Data saved to JSON successfully.");
+    @GetMapping("/getLatestData")
+    public ResponseEntity<Map<String, Object>> getLatestData() {
+        return ResponseEntity.ok(machineService.getLatestData());
+    }
+
+    @GetMapping("/dosage")
+    public ResponseEntity<List<Machine>> getCurrentMachines() {
+        List<Machine> machines = machineService.getAllMachines(); // 모든 기기 데이터 조회
+        return ResponseEntity.ok(machines);
     }
 }
